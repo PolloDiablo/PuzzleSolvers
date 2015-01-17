@@ -1,0 +1,61 @@
+** do everything dealing with sets of squares where possible?
+
+Algorithms:
+	1 See if only 1 number can go in a square (look in its row, col, section)
+		X NOPE, this can be done automagically using the possibilities set
+		INSTEAD: look at known values, enforce them on everything in their row, col 
+			and section. This algorithm happens automatically.
+	
+	2 See if a number only has one possible spot in a row
+	3 See if a number only has one possible spot in a col
+	4 See if a number only has one possible spot in a section
+	5 If a number can only go in one row/col within a section
+		- Use this knowledge to eliminate possibilities in other row/col locations
+
+Board:
+	- 81 squares
+	- iterate through, getNext()
+		
+Square:
+	- known/unknown boolean
+		- GET only, set when setting value
+	- value if known
+		- set/get
+			On set, enforce on all "neighbours"
+			On set, set boolean
+	- [9] possibilities if unknown (each can be a boolean to indicate NOT possible)
+		- isPossible(int x) - given number 1 thru 9, returns true if possible
+		- set, get
+			- ** On set, see if only one possibility is left, make this known
+			- then apply the KNOWN value algorithm (1)
+	- 1 associated row:
+	- 1 associated col:
+	- 1 associated section:
+
+SuperArea:
+	- set of 9 squares(order irrelevant)
+		- set, get ***returns a set, we must be able to do logical AND operation
+		- NO function to get individual square, would need some ordering/indexing
+	- set of known values (order irrelevant) - initially empty
+		- add, remove, get?
+	- set of unknown values(order irrelevant) - initially [0,9]
+		- add, remove, get?
+	- contains(int x)  //checks if this number already exists in this area
+	
+Row:
+	- a set of intersecting sections (order shouldn't matter?)
+Col:
+	- a set of intersecting sections (order shouldn't matter?)
+Section:
+	- a set of intersecting rows (order shouldn't matter?)
+	- a set of intersecting cols (order shouldn't matter?)
+
+
+For any set of Squares we need
+	- mayContain(int x)
+		Checks each square in subset, sees if ANY of the squares in the set
+		could possibly contain this number
+	- Used in algorithm 5
+		(Checking each row/col of 3 squares within a section, etc.)
+	- Can also be used for checking board validity
+		(every row/col/section must have mayContain true for every number)
