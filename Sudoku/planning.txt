@@ -1,20 +1,26 @@
 ** do everything dealing with sets of squares where possible?
 
 Algorithms:
-	1 See if only 1 number can go in a square (look in its row, col, section)
-		X NOPE, this can be done automagically using the possibilities set
-		INSTEAD: look at known values, enforce them on everything in their row, col 
-			and section. This algorithm happens automatically.
+	1. See if only 1 possible number can go in a square (based on possibilities)
+		- this can be done automagically using the possibilities set (all within the Square class)
+		
+	2. See if a number only has one possible spot in a row
+	3. See if a number only has one possible spot in a col
+	4. See if a number only has one possible spot in a section
 	
-	2 See if a number only has one possible spot in a row
-	3 See if a number only has one possible spot in a col
-	4 See if a number only has one possible spot in a section
-	5 If a number can only go in one row/col within a section
-		- Use this knowledge to eliminate possibilities in other row/col locations
+	5. See if a number can only go in one section within a row
+		- Use this knowledge to eliminate possibilities in the other sections
+	6. See if a number can only go in one section within a column
+		- Use this knowledge to eliminate possibilities in the other sections
+	7. See if a number can only go in one row/col within a section
+		- Use this knowledge to eliminate possibilities in other row/col locations		
 
 Board:
 	- 81 squares
 	- iterate through, getNext()
+	- 9 associated row:
+	- 9 associated col:
+	- 9 associated section: TODO?? Open for expansion? Sections could be any shape in other puzzles
 		
 Square:
 	- known/unknown boolean
@@ -42,20 +48,21 @@ SuperArea:
 		- add, remove, get?
 	- contains(int x)  //checks if this number already exists in this area
 	
-Row:
-	- a set of intersecting sections (order shouldn't matter?)
-Col:
-	- a set of intersecting sections (order shouldn't matter?)
-Section:
-	- a set of intersecting rows (order shouldn't matter?)
-	- a set of intersecting cols (order shouldn't matter?)
+	For any set of Squares we need
+		- mayContain(int x)
+			Checks each square in subset, sees if ANY of the squares in the set
+			could possibly contain this number
+		- Used in algorithm 5
+			(Checking each row/col of 3 squares within a section, etc.)
+		- Can also be used for checking board validity
+			(every row/col/section must have mayContain true for every number)	
+	
+	TODO what is the best way to organize this? Code reuse? Common function?
+	Row:
+		- a set of squares intersecting 3 sections and 9 rows (order shouldn't matter)
+	Col:
+		- a set of squares intersecting 3 sections and 9 rows (order shouldn't matter)
+	Section:
+		- a set of squares intersecting 3 rows and 3 cols (order shouldn't matter)
 
 
-For any set of Squares we need
-	- mayContain(int x)
-		Checks each square in subset, sees if ANY of the squares in the set
-		could possibly contain this number
-	- Used in algorithm 5
-		(Checking each row/col of 3 squares within a section, etc.)
-	- Can also be used for checking board validity
-		(every row/col/section must have mayContain true for every number)
