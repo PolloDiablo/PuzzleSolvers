@@ -1,18 +1,24 @@
 package sudoku.fun.main;
 
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
 
 /** Represents one of the 81 squares on the 9*9 Sudoku board */
 public class Square {
 	
-	/** Indicates whether the square's value has been determined, initially false*/
-	// GET only (it is SET internally)
+	public static final Integer VALUE_UNKNOWN = -1;
+	public static final Integer VALUE_MINIMUM = 1;
+	
+	/** Indicates whether the square's value has been determined, initially false
+	 * GET only (it is SET internally)*/
 	private boolean known;
 	
 	public boolean isKnown(){
 		return known;
 	}
-	
-	
+		
 	/** The value of the square, initially unknown (-1)*/
 	private int value;
 	
@@ -28,28 +34,31 @@ public class Square {
 	 *  - square already has a value
 	 *  - given value was pre-determined to be an impossibility
 	 *  
-	 TODO: enforces possibilities on all "neighbours" (row, col, section)
+	 * Sets all possibilities to false.
+	 * Enforces possibilities on all "neighbours" in row, column, and section.
 	 */
-	public void setValue(int newValue) throws Exception{
-		if(value<1 || value > 9){
-			throw new Exception("ERROR setValue(): valid square values are [1-9] only.");
+	public void setValue(int newValue) throws SudokuException{
+		if(value < VALUE_MINIMUM || value > Solver.getN()){
+			throw new SudokuException("ERROR setValue(): valid square values are [1-9] only.");
 		}
 		if(known == true){
-			throw new Exception("ERROR setValue(): you cannot change the value of a known square.");
+			throw new SudokuException("ERROR setValue(): you cannot change the value of a known square.");
 		}
 		if(possibilities[newValue] == false){
-			throw new Exception("ERROR setValue(): this square may not contain this value.");
+			throw new SudokuException("ERROR setValue(): this square may not contain this value.");
 		}
 		known = true;
 		value = newValue;
-		// Set all other possibility booleans to false
-		for(int i = 1 ; i <= 9 ; ++i){
-			if(i != newValue){
-				possibilities[i] = false;
-			}
+		// Set all possibility booleans to false
+		for(int i = VALUE_MINIMUM ; i <= Solver.getN() ; ++i){
+			possibilities[i] = false;
 		}
 		
-		//TODO: enforces possibilities on all "neighbours" (row, col, section)
+		// Set possibility booleans of newValue to false for neighbours
+		Iterator<Square> iterator = neighbours.iterator(); 
+		while (iterator.hasNext()){
+			iterator.next().setImpossibility(newValue);
+		}
 	}
 	
 	/** Indicates whether the square may contain each of [1-9], initially all true.*/
@@ -67,19 +76,19 @@ public class Square {
 	 *  - all possibilities are now false
 	 *  - only one possibility remained, and setting the value of the square threw an exception
 	 */
-	public void setImpossibility(int value) throws Exception{
+	public void setImpossibility(int value) throws SudokuException{
 		// Set this possibility to false
 		possibilities[value] = false;
 		
 		// Check if all possibilities are now false
 		int trueCount = 0;
-		for(int i = 1 ; i <= 9 ; ++i){
+		for(int i = VALUE_MINIMUM ; i <= Solver.getN() ; ++i){
 			if( possibilities[i] ){
 				++trueCount;
 			}
 		}
 		if(trueCount == 0){
-			throw new Exception("ERROR setImpossibility(): this square has no remaining possible values.");
+			throw new SudokuException("ERROR setImpossibility(): this square has no remaining possible values.");
 		}else if(trueCount == 1){
 			// Only one possibility remaining
 			setValue(value);
@@ -110,16 +119,34 @@ public class Square {
 		return section;
 	}
 	
-	public Square(Area row, Area column, Area section){
+	Set<Square> neighbours; 
+	
+	/**
+	 * Populates the neighbours list (from the row, column, and section Areas)
+	 * This must be called after all Squares and Areas have been created.
+	 */
+	public void calculateNeighbours(){
+		neighbours = new HashSet<Square>(row.getAllSquares());
+		neighbours.addAll(column.getAllSquares());
+		neighbours.addAll(section.getAllSquares());
+		neighbours.remove(this);
+	}
+	
+	public Square(Area row, Area column, Area section) throws SudokuException{
 		known = false;
-		value = -1;
-		possibilities = new boolean[10]; // Just makes things easier to ignore the
-		for (int i = 1; i <=9 ; ++i){
+		value = VALUE_UNKNOWN;
+		possibilities = new boolean[Solver.getN() + 1]; // Just makes things easier to ignore the 0 for this array
+		for (int i = VALUE_MINIMUM; i <= Solver.getN() ; ++i){
 			possibilities[i] = false;
 		}
 		this.row = row;
+		row.addSquare(this);
+		
 		this.column = column;
+		column.addSquare(this);
+		
 		this.section = section;
+		section.addSquare(this);
 	}
-	
+
 }
