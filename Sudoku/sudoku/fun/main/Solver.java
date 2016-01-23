@@ -16,7 +16,7 @@ public class Solver {
 	 *	- e.g. (0,5,9)
 	 *	 
 	 */
-	private static String fileName = "input1.txt";
+	private static String fileName = "input3.txt";
 	
 	private static Board myBoard;
 	
@@ -29,30 +29,41 @@ public class Solver {
 		System.out.println("Hello!");
 		
 		// Create the game board
-		Board myBoard = new Board();
+		myBoard = new Board();
 		
 		// Read the input file
 		try {
 			myBoard.readInput(fileName);
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("Input Parsing Error! Exiting...");
+			//System.out.println(e.getMessage());
+			System.out.println("\nERROR During Input Parsing! Exiting...");
 			return;
 		}
 		
-		myBoard.displayBoard();
-		
 		// Now solve!
 		
-		// TODO
+		// For easy puzzles, the logic built in to the creation of the board will solve the puzzle by itself...
+		// Now analyze what the safe solver has returned
+		if(!myBoard.isValid() ){
+			// The given board is unsolvable: stop
+			System.out.println("The board is unsolvable! Exiting...");
+			myBoard.displayBoard();
+			return;
+		}
+		if(myBoard.isComplete()){
+			System.out.println("SUCCESS!");
+			myBoard.displayBoard();
+			return;
+		}
 		
-		/*
 		// First attempt to do it the logical/smart way (no guessing)
 		System.out.println("Attempting smart-solve...");
 		try {
 			safeSolve(myBoard);
-		} catch (Exception e) {
+		} catch (SudokuException e) {
 			System.out.println("The board is unsolvable! Exiting...");
+			myBoard.displayBoard();
 			return;
 		}
 
@@ -60,6 +71,7 @@ public class Solver {
 		if(!myBoard.isValid() ){
 			// The given board is unsolvable: stop
 			System.out.println("The board is unsolvable! Exiting...");
+			myBoard.displayBoard();
 			return;
 		}else if(!myBoard.isComplete()){
 			System.out.println("Smart-solve was unsuccessful, trying dumb-solve.");
@@ -73,16 +85,15 @@ public class Solver {
 			myBoard.displayBoard();
 		}else{
 			// No answer found :(
-			System.out.println("FAILURE! No solution was found.");
+			System.out.println("A solution could not be computed :( Jeremy needs better algorithms...");
+			myBoard.displayBoard();
 		}
-		 */
-			
 	}
 	
 	
 	/** Attempts to fill-in as much of the grid as possible without guessing
 		Throws exception if the board cannot be solved safely*/
-	private static void safeSolve(Board myBoard) throws Exception{
+	private static void safeSolve(Board myBoard) throws SudokuException{
 
 		// TODO
 		//Algorithms.doSomething(myBoard);
